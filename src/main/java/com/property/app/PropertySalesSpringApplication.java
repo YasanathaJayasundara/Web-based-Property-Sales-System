@@ -1,12 +1,15 @@
-package com.realestate.app;
+package com.property.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ealEstateSpringApplication {
+public class PropertySalesSpringApplication {
+
     public static void main(String[] args) {
-        SpringApplication.run(RealEstateSpringApplication.class, args);
+        SpringApplication.run(
+                PropertySalesSpringApplication.class,
+                args
+        );
     }
 }
-
