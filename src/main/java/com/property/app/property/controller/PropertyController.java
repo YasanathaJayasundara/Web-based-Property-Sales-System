@@ -3,8 +3,8 @@ package com.property.app.property.controller;
 import com.property.app.property.dto.PropertyRequest;
 import com.property.app.property.dto.PropertyResponse;
 import com.property.app.property.service.PropertyService;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,16 +19,39 @@ public class PropertyController {
         this.propertyService = propertyService;
     }
 
-    @GetMapping
-    public List<PropertyResponse> getAllProperties() {
-        return propertyService.getAllProperties();
+    // Create a new property listing
+    @PostMapping
+    public ResponseEntity<PropertyResponse> createProperty(
+            @RequestBody PropertyRequest request
+    ) {
+
+        PropertyResponse createdProperty =
+                propertyService.createProperty(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(createdProperty);
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public PropertyResponse createProperty(
-            @Valid @RequestBody PropertyRequest request) {
+    // Get all property listings
+    @GetMapping
+    public ResponseEntity<List<PropertyResponse>> getAllProperties() {
 
-        return propertyService.createProperty(request);
+        List<PropertyResponse> properties =
+                propertyService.getAllProperties();
+
+        return ResponseEntity.ok(properties);
+    }
+
+    // Get one property by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<PropertyResponse> getPropertyById(
+            @PathVariable Long id
+    ) {
+
+        PropertyResponse property =
+                propertyService.getPropertyById(id);
+
+        return ResponseEntity.ok(property);
     }
 }
