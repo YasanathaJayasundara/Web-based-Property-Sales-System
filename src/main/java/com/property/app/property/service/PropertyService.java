@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -21,9 +20,8 @@ public class PropertyService {
         this.propertyRepository = propertyRepository;
     }
 
-    // Create a new property listing
+    // Create a new property
     public PropertyResponse createProperty(PropertyRequest request) {
-
         Property property = new Property();
 
         copyRequestToProperty(request, property);
@@ -33,55 +31,65 @@ public class PropertyService {
         return convertToResponse(savedProperty);
     }
 
-    // Get every property listing
+    // Get all properties
     @Transactional(readOnly = true)
     public List<PropertyResponse> getAllProperties() {
-
         return propertyRepository.findAll()
                 .stream()
                 .map(this::convertToResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    // Get one property using its ID
+    // Get one property by ID
     @Transactional(readOnly = true)
     public PropertyResponse getPropertyById(Long id) {
-
         Property property = findPropertyById(id);
 
         return convertToResponse(property);
     }
 
-    // Internal method used to find a property
-    private Property findPropertyById(Long id) {
+    // Update an existing property
+    public PropertyResponse updateProperty(
+            Long id,
+            PropertyRequest request
+    ) {
+        Property existingProperty = findPropertyById(id);
 
+        copyRequestToProperty(request, existingProperty);
+
+        Property updatedProperty =
+                propertyRepository.save(existingProperty);
+
+        return convertToResponse(updatedProperty);
+    }
+
+    // Delete a property
+    public void deleteProperty(Long id) {
+        Property existingProperty = findPropertyById(id);
+
+        propertyRepository.delete(existingProperty);
+    }
+
+    // Find property or throw an error
+    private Property findPropertyById(Long id) {
         return propertyRepository.findById(id)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
+                        new RuntimeException(
                                 "Property not found with ID: " + id
                         )
                 );
     }
 
-    // Copy request data into the Property entity
+    // Copy request details into the entity
     private void copyRequestToProperty(
             PropertyRequest request,
             Property property
     ) {
-
-        BeanUtils.copyProperties(
-                request,
-                property,
-                "id",
-                "status",
-                "createdAt",
-                "updatedAt"
-        );
+        BeanUtils.copyProperties(request, property);
     }
 
-    // Convert a Property entity into PropertyResponse
+    // Convert entity into response DTO
     private PropertyResponse convertToResponse(Property property) {
-
         PropertyResponse response = new PropertyResponse();
 
         BeanUtils.copyProperties(property, response);

@@ -19,12 +19,11 @@ public class PropertyController {
         this.propertyService = propertyService;
     }
 
-    // Create a new property listing
+    // POST: Create a new property
     @PostMapping
     public ResponseEntity<PropertyResponse> createProperty(
             @RequestBody PropertyRequest request
     ) {
-
         PropertyResponse createdProperty =
                 propertyService.createProperty(request);
 
@@ -33,25 +32,45 @@ public class PropertyController {
                 .body(createdProperty);
     }
 
-    // Get all property listings
+    // GET: Get all properties
     @GetMapping
     public ResponseEntity<List<PropertyResponse>> getAllProperties() {
-
         List<PropertyResponse> properties =
                 propertyService.getAllProperties();
 
         return ResponseEntity.ok(properties);
     }
 
-    // Get one property by ID
+    // GET: Get a property by ID
     @GetMapping("/{id}")
     public ResponseEntity<PropertyResponse> getPropertyById(
             @PathVariable Long id
     ) {
-
         PropertyResponse property =
                 propertyService.getPropertyById(id);
 
         return ResponseEntity.ok(property);
+    }
+
+    // PUT: Update a property
+    @PutMapping("/{id}")
+    public ResponseEntity<PropertyResponse> updateProperty(
+            @PathVariable Long id,
+            @RequestBody PropertyRequest request
+    ) {
+        PropertyResponse updatedProperty =
+                propertyService.updateProperty(id, request);
+
+        return ResponseEntity.ok(updatedProperty);
+    }
+
+    // DELETE: Delete a property
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProperty(
+            @PathVariable Long id
+    ) {
+        propertyService.deleteProperty(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
