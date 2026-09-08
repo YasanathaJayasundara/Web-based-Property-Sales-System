@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -37,6 +38,29 @@ public class PropertyController {
         return ResponseEntity.ok(
                 propertyService.getAllProperties()
         );
+    }
+
+    // Search and filter endpoint
+    @GetMapping("/search")
+    public ResponseEntity<List<PropertyResponse>> searchProperties(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String propertyType,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice
+    ) {
+        List<PropertyResponse> properties =
+                propertyService.searchProperties(
+                        keyword,
+                        city,
+                        propertyType,
+                        status,
+                        minPrice,
+                        maxPrice
+                );
+
+        return ResponseEntity.ok(properties);
     }
 
     @GetMapping("/{id}")

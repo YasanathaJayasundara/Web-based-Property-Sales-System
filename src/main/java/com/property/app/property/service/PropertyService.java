@@ -2,6 +2,7 @@ package com.property.app.property.service;
 
 import com.property.app.property.dto.PropertyRequest;
 import com.property.app.property.dto.PropertyResponse;
+import com.property.app.property.exception.InvalidSearchCriteriaException;
 import com.property.app.property.exception.PropertyNotFoundException;
 import com.property.app.property.model.Property;
 import com.property.app.property.repository.PropertyRepository;
@@ -9,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -62,6 +64,75 @@ public class PropertyService {
         Property existingProperty = findPropertyById(id);
 
         propertyRepository.delete(existingProperty);
+    }
+
+    // Search and filter properties
+    @Transactional(readOnly = true)
+    public List<PropertyResponse> searchProperties(
+            String keyword,
+            String city,
+            String propertyType,
+            String status,
+            BigDecimal minPrice,
+            BigDecimal maxPrice
+    ) {
+        validatePriceRange(minPrice, maxPrice);
+
+        String normalizedKeyword = normalizeText(keyword);
+        String normalizedCity = normalizeText(city);
+        String normalizedType = normalizeText(propertyType);
+        String normalizedStatus = normalizeText(status);
+
+        String keywordPattern = normalizedKeyword == null
+                ? null
+                : "%" + normalizedKeyword + "%";
+
+        return propertyRepository.searchProperties(
+                        keywordPattern,
+                        normalizedCity,
+                        normalizedType,
+                        normalizedStatus,
+                        minPrice,
+                        maxPrice
+                )
+                .stream()
+                .map(this::convertToResponse)
+                .toList();
+    }
+
+    private void validatePriceRange(
+            BigDecimal minPrice,
+            BigDecimal maxPrice
+    ) {
+        if (minPrice != null
+                && minPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new InvalidSearchCriteriaException(
+                    "Minimum price cannot be negative"
+            );
+        }
+
+        if (maxPrice != null
+                && maxPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new InvalidSearchCriteriaException(
+                    "Maximum price cannot be negative"
+            );
+        }
+
+        if (minPrice != null
+                && maxPrice != null
+                && minPrice.compareTo(maxPrice) > 0) {
+            throw new InvalidSearchCriteriaException(
+                    "Minimum price cannot be greater than maximum price"
+            );
+        }
+    }
+
+    private String normalizeText(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        return value.trim();
     }
 
     private Property findPropertyById(Long id) {
