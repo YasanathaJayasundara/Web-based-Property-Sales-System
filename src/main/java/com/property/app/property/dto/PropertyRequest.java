@@ -1,98 +1,57 @@
 package com.property.app.property.dto;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
 public class PropertyRequest {
 
-        @NotBlank(message = "Property title is required")
-        @Size(
-                max = 120,
-                message = "Property title cannot exceed 120 characters"
-        )
+        @NotBlank(message = "Title is required")
+        @Size(max = 120, message = "Title cannot exceed 120 characters")
         private String title;
 
-        @NotBlank(message = "Property description is required")
-        @Size(
-                max = 1000,
-                message = "Description cannot exceed 1000 characters"
-        )
+        @NotBlank(message = "Description is required")
+        @Size(max = 2000, message = "Description cannot exceed 2000 characters")
         private String description;
-
-        @NotBlank(message = "Property location is required")
-        private String location;
-
-        @NotBlank(message = "City is required")
-        private String city;
 
         @NotBlank(message = "Property type is required")
         private String propertyType;
 
-        @NotNull(message = "Property price is required")
-        @DecimalMin(
-                value = "0.01",
-                message = "Property price must be greater than zero"
-        )
+        @NotBlank(message = "Address is required")
+        @Size(max = 255, message = "Address cannot exceed 255 characters")
+        private String address;
+
+        @NotBlank(message = "City is required")
+        @Size(max = 100, message = "City cannot exceed 100 characters")
+        private String city;
+
+        @NotNull(message = "Price is required")
+        @Positive(message = "Price must be greater than zero")
         private BigDecimal price;
 
-        @Min(
-                value = 0,
-                message = "Number of bedrooms cannot be negative"
-        )
+        @NotNull(message = "Number of bedrooms is required")
+        @PositiveOrZero(message = "Bedrooms cannot be negative")
         private Integer bedrooms;
 
-        @Min(
-                value = 0,
-                message = "Number of bathrooms cannot be negative"
-        )
+        @NotNull(message = "Number of bathrooms is required")
+        @PositiveOrZero(message = "Bathrooms cannot be negative")
         private Integer bathrooms;
 
-        @Positive(message = "Property area must be greater than zero")
+        @NotNull(message = "Area is required")
+        @Positive(message = "Area must be greater than zero")
         private Double area;
 
-        @Size(
-                max = 500,
-                message = "Image URL cannot exceed 500 characters"
-        )
+        @NotBlank(message = "Property status is required")
+        private String status;
+
+        @Size(max = 500, message = "Image URL cannot exceed 500 characters")
         private String imageUrl;
 
-        @NotNull(message = "Seller ID is required")
-        @Positive(message = "Seller ID must be greater than zero")
-        private Long sellerId;
-
         public PropertyRequest() {
-        }
-
-        public PropertyRequest(
-                String title,
-                String description,
-                String location,
-                String city,
-                String propertyType,
-                BigDecimal price,
-                Integer bedrooms,
-                Integer bathrooms,
-                Double area,
-                String imageUrl,
-                Long sellerId
-        ) {
-                this.title = title;
-                this.description = description;
-                this.location = location;
-                this.city = city;
-                this.propertyType = propertyType;
-                this.price = price;
-                this.bedrooms = bedrooms;
-                this.bathrooms = bathrooms;
-                this.area = area;
-                this.imageUrl = imageUrl;
-                this.sellerId = sellerId;
         }
 
         public String getTitle() {
@@ -111,12 +70,20 @@ public class PropertyRequest {
                 this.description = description;
         }
 
-        public String getLocation() {
-                return location;
+        public String getPropertyType() {
+                return propertyType;
         }
 
-        public void setLocation(String location) {
-                this.location = location;
+        public void setPropertyType(String propertyType) {
+                this.propertyType = propertyType;
+        }
+
+        public String getAddress() {
+                return address;
+        }
+
+        public void setAddress(String address) {
+                this.address = address;
         }
 
         public String getCity() {
@@ -125,14 +92,6 @@ public class PropertyRequest {
 
         public void setCity(String city) {
                 this.city = city;
-        }
-
-        public String getPropertyType() {
-                return propertyType;
-        }
-
-        public void setPropertyType(String propertyType) {
-                this.propertyType = propertyType;
         }
 
         public BigDecimal getPrice() {
@@ -167,19 +126,19 @@ public class PropertyRequest {
                 this.area = area;
         }
 
+        public String getStatus() {
+                return status;
+        }
+
+        public void setStatus(String status) {
+                this.status = status;
+        }
+
         public String getImageUrl() {
                 return imageUrl;
         }
 
         public void setImageUrl(String imageUrl) {
                 this.imageUrl = imageUrl;
-        }
-
-        public Long getSellerId() {
-                return sellerId;
-        }
-
-        public void setSellerId(Long sellerId) {
-                this.sellerId = sellerId;
         }
 }

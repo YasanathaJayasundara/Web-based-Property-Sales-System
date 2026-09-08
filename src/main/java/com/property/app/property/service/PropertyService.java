@@ -2,6 +2,7 @@ package com.property.app.property.service;
 
 import com.property.app.property.dto.PropertyRequest;
 import com.property.app.property.dto.PropertyResponse;
+import com.property.app.property.exception.PropertyNotFoundException;
 import com.property.app.property.model.Property;
 import com.property.app.property.repository.PropertyRepository;
 import org.springframework.beans.BeanUtils;
@@ -20,7 +21,6 @@ public class PropertyService {
         this.propertyRepository = propertyRepository;
     }
 
-    // Create a new property
     public PropertyResponse createProperty(PropertyRequest request) {
         Property property = new Property();
 
@@ -31,7 +31,6 @@ public class PropertyService {
         return convertToResponse(savedProperty);
     }
 
-    // Get all properties
     @Transactional(readOnly = true)
     public List<PropertyResponse> getAllProperties() {
         return propertyRepository.findAll()
@@ -40,15 +39,11 @@ public class PropertyService {
                 .toList();
     }
 
-    // Get one property by ID
     @Transactional(readOnly = true)
     public PropertyResponse getPropertyById(Long id) {
-        Property property = findPropertyById(id);
-
-        return convertToResponse(property);
+        return convertToResponse(findPropertyById(id));
     }
 
-    // Update an existing property
     public PropertyResponse updateProperty(
             Long id,
             PropertyRequest request
@@ -63,32 +58,32 @@ public class PropertyService {
         return convertToResponse(updatedProperty);
     }
 
-    // Delete a property
     public void deleteProperty(Long id) {
         Property existingProperty = findPropertyById(id);
 
         propertyRepository.delete(existingProperty);
     }
 
-    // Find property or throw an error
     private Property findPropertyById(Long id) {
         return propertyRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Property not found with ID: " + id
-                        )
+                        new PropertyNotFoundException(id)
                 );
     }
 
-    // Copy request details into the entity
     private void copyRequestToProperty(
             PropertyRequest request,
             Property property
     ) {
-        BeanUtils.copyProperties(request, property);
+        BeanUtils.copyProperties(
+                request,
+                property,
+                "id",
+                "createdAt",
+                "updatedAt"
+        );
     }
 
-    // Convert entity into response DTO
     private PropertyResponse convertToResponse(Property property) {
         PropertyResponse response = new PropertyResponse();
 

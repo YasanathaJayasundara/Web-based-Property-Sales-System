@@ -3,6 +3,7 @@ package com.property.app.property.controller;
 import com.property.app.property.dto.PropertyRequest;
 import com.property.app.property.dto.PropertyResponse;
 import com.property.app.property.service.PropertyService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,10 +20,9 @@ public class PropertyController {
         this.propertyService = propertyService;
     }
 
-    // POST: Create a new property
     @PostMapping
     public ResponseEntity<PropertyResponse> createProperty(
-            @RequestBody PropertyRequest request
+            @Valid @RequestBody PropertyRequest request
     ) {
         PropertyResponse createdProperty =
                 propertyService.createProperty(request);
@@ -32,39 +32,32 @@ public class PropertyController {
                 .body(createdProperty);
     }
 
-    // GET: Get all properties
     @GetMapping
     public ResponseEntity<List<PropertyResponse>> getAllProperties() {
-        List<PropertyResponse> properties =
-                propertyService.getAllProperties();
-
-        return ResponseEntity.ok(properties);
+        return ResponseEntity.ok(
+                propertyService.getAllProperties()
+        );
     }
 
-    // GET: Get a property by ID
     @GetMapping("/{id}")
     public ResponseEntity<PropertyResponse> getPropertyById(
             @PathVariable Long id
     ) {
-        PropertyResponse property =
-                propertyService.getPropertyById(id);
-
-        return ResponseEntity.ok(property);
+        return ResponseEntity.ok(
+                propertyService.getPropertyById(id)
+        );
     }
 
-    // PUT: Update a property
     @PutMapping("/{id}")
     public ResponseEntity<PropertyResponse> updateProperty(
             @PathVariable Long id,
-            @RequestBody PropertyRequest request
+            @Valid @RequestBody PropertyRequest request
     ) {
-        PropertyResponse updatedProperty =
-                propertyService.updateProperty(id, request);
-
-        return ResponseEntity.ok(updatedProperty);
+        return ResponseEntity.ok(
+                propertyService.updateProperty(id, request)
+        );
     }
 
-    // DELETE: Delete a property
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProperty(
             @PathVariable Long id
