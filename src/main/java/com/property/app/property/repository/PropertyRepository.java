@@ -20,7 +20,7 @@ public interface PropertyRepository
                 :keywordPattern IS NULL
                 OR LOWER(p.title) LIKE LOWER(:keywordPattern)
                 OR LOWER(p.description) LIKE LOWER(:keywordPattern)
-                OR LOWER(p.address) LIKE LOWER(:keywordPattern)
+                OR LOWER(p.location) LIKE LOWER(:keywordPattern)
             )
             AND (
                 :city IS NULL
@@ -32,7 +32,7 @@ public interface PropertyRepository
             )
             AND (
                 :status IS NULL
-                OR LOWER(p.status) = LOWER(:status)
+                OR p.status = :status
             )
             AND (
                 :minPrice IS NULL
@@ -48,8 +48,12 @@ public interface PropertyRepository
             @Param("keywordPattern") String keywordPattern,
             @Param("city") String city,
             @Param("propertyType") String propertyType,
-            @Param("status") String status,
+            @Param("status") Property.Status status,
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice
+    );
+
+    List<Property> findAllByStatusOrderByCreatedAtDesc(
+            Property.Status status
     );
 }

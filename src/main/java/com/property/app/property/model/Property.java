@@ -12,6 +12,7 @@ public class Property {
     public enum Status {
         PENDING,
         APPROVED,
+        PUBLISHED,
         REJECTED,
         SOLD
     }
@@ -23,7 +24,7 @@ public class Property {
     @Column(nullable = false, length = 120)
     private String title;
 
-    @Column(nullable = false, length = 1000)
+    @Column(nullable = false, length = 2000)
     private String description;
 
     @Column(nullable = false)
@@ -53,6 +54,9 @@ public class Property {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status = Status.PENDING;
+
+    @Column(length = 500)
+    private String rejectionReason;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -198,6 +202,14 @@ public class Property {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
     }
 
     public LocalDateTime getCreatedAt() {

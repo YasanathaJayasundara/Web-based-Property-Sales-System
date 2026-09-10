@@ -1,6 +1,7 @@
 package com.property.app.property.controller;
 
 import com.property.app.property.dto.PropertyRequest;
+import com.property.app.property.dto.PropertyRejectionRequest;
 import com.property.app.property.dto.PropertyResponse;
 import com.property.app.property.service.PropertyService;
 import jakarta.validation.Valid;
@@ -40,7 +41,20 @@ public class PropertyController {
         );
     }
 
-    // Search and filter endpoint
+    @GetMapping("/pending")
+    public ResponseEntity<List<PropertyResponse>> getPendingProperties() {
+        return ResponseEntity.ok(
+                propertyService.getPendingProperties()
+        );
+    }
+
+    @GetMapping("/published")
+    public ResponseEntity<List<PropertyResponse>> getPublishedProperties() {
+        return ResponseEntity.ok(
+                propertyService.getPublishedProperties()
+        );
+    }
+
     @GetMapping("/search")
     public ResponseEntity<List<PropertyResponse>> searchProperties(
             @RequestParam(required = false) String keyword,
@@ -50,7 +64,7 @@ public class PropertyController {
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice
     ) {
-        List<PropertyResponse> properties =
+        return ResponseEntity.ok(
                 propertyService.searchProperties(
                         keyword,
                         city,
@@ -58,9 +72,8 @@ public class PropertyController {
                         status,
                         minPrice,
                         maxPrice
-                );
-
-        return ResponseEntity.ok(properties);
+                )
+        );
     }
 
     @GetMapping("/{id}")
@@ -79,6 +92,37 @@ public class PropertyController {
     ) {
         return ResponseEntity.ok(
                 propertyService.updateProperty(id, request)
+        );
+    }
+
+    @PatchMapping("/{id}/approve")
+    public ResponseEntity<PropertyResponse> approveProperty(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(
+                propertyService.approveProperty(id)
+        );
+    }
+
+    @PatchMapping("/{id}/publish")
+    public ResponseEntity<PropertyResponse> publishProperty(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(
+                propertyService.publishProperty(id)
+        );
+    }
+
+    @PatchMapping("/{id}/reject")
+    public ResponseEntity<PropertyResponse> rejectProperty(
+            @PathVariable Long id,
+            @Valid @RequestBody PropertyRejectionRequest request
+    ) {
+        return ResponseEntity.ok(
+                propertyService.rejectProperty(
+                        id,
+                        request.getReason()
+                )
         );
     }
 

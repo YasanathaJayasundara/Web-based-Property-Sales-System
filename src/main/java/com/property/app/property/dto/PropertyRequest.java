@@ -21,9 +21,9 @@ public class PropertyRequest {
         @NotBlank(message = "Property type is required")
         private String propertyType;
 
-        @NotBlank(message = "Address is required")
-        @Size(max = 255, message = "Address cannot exceed 255 characters")
-        private String address;
+        @NotBlank(message = "Location is required")
+        @Size(max = 255, message = "Location cannot exceed 255 characters")
+        private String location;
 
         @NotBlank(message = "City is required")
         @Size(max = 100, message = "City cannot exceed 100 characters")
@@ -45,8 +45,9 @@ public class PropertyRequest {
         @Positive(message = "Area must be greater than zero")
         private Double area;
 
-        @NotBlank(message = "Property status is required")
-        private String status;
+        @NotNull(message = "Seller ID is required")
+        @Positive(message = "Seller ID must be greater than zero")
+        private Long sellerId;
 
         @Size(max = 500, message = "Image URL cannot exceed 500 characters")
         private String imageUrl;
@@ -78,12 +79,12 @@ public class PropertyRequest {
                 this.propertyType = propertyType;
         }
 
-        public String getAddress() {
-                return address;
+        public String getLocation() {
+                return location;
         }
 
-        public void setAddress(String address) {
-                this.address = address;
+        public void setLocation(String location) {
+                this.location = location;
         }
 
         public String getCity() {
@@ -126,12 +127,12 @@ public class PropertyRequest {
                 this.area = area;
         }
 
-        public String getStatus() {
-                return status;
+        public Long getSellerId() {
+                return sellerId;
         }
 
-        public void setStatus(String status) {
-                this.status = status;
+        public void setSellerId(Long sellerId) {
+                this.sellerId = sellerId;
         }
 
         public String getImageUrl() {

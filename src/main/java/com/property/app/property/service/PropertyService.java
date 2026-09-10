@@ -2,6 +2,7 @@ package com.property.app.property.service;
 
 import com.property.app.property.dto.PropertyRequest;
 import com.property.app.property.dto.PropertyResponse;
+import com.property.app.property.exception.InvalidPropertyStatusException;
 import com.property.app.property.exception.InvalidSearchCriteriaException;
 import com.property.app.property.exception.PropertyNotFoundException;
 import com.property.app.property.model.Property;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @Transactional
@@ -28,7 +30,11 @@ public class PropertyService {
 
         copyRequestToProperty(request, property);
 
-        Property savedProperty = propertyRepository.save(property);
+        property.setStatus(Property.Status.PENDING);
+        property.setRejectionReason(null);
+
+        Property savedProperty =
+                propertyRepository.save(property);
 
         return convertToResponse(savedProperty);
     }
@@ -39,6 +45,16 @@ public class PropertyService {
                 .stream()
                 .map(this::convertToResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PropertyResponse> getPendingProperties() {
+        return getPropertiesByStatus(Property.Status.PENDING);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PropertyResponse> getPublishedProperties() {
+        return getPropertiesByStatus(Property.Status.PUBLISHED);
     }
 
     @Transactional(readOnly = true)
@@ -66,7 +82,70 @@ public class PropertyService {
         propertyRepository.delete(existingProperty);
     }
 
-    // Search and filter properties
+    public PropertyResponse approveProperty(Long id) {
+        Property property = findPropertyById(id);
+
+        if (property.getStatus() == Property.Status.APPROVED) {
+            return convertToResponse(property);
+        }
+
+        requireStatus(
+                property,
+                Property.Status.PENDING,
+                "approved"
+        );
+
+        property.setStatus(Property.Status.APPROVED);
+        property.setRejectionReason(null);
+
+        Property approvedProperty =
+                propertyRepository.save(property);
+
+        return convertToResponse(approvedProperty);
+    }
+
+    public PropertyResponse publishProperty(Long id) {
+        Property property = findPropertyById(id);
+
+        if (property.getStatus() == Property.Status.PUBLISHED) {
+            return convertToResponse(property);
+        }
+
+        requireStatus(
+                property,
+                Property.Status.APPROVED,
+                "published"
+        );
+
+        property.setStatus(Property.Status.PUBLISHED);
+
+        Property publishedProperty =
+                propertyRepository.save(property);
+
+        return convertToResponse(publishedProperty);
+    }
+
+    public PropertyResponse rejectProperty(
+            Long id,
+            String reason
+    ) {
+        Property property = findPropertyById(id);
+
+        requireStatus(
+                property,
+                Property.Status.PENDING,
+                "rejected"
+        );
+
+        property.setStatus(Property.Status.REJECTED);
+        property.setRejectionReason(reason.trim());
+
+        Property rejectedProperty =
+                propertyRepository.save(property);
+
+        return convertToResponse(rejectedProperty);
+    }
+
     @Transactional(readOnly = true)
     public List<PropertyResponse> searchProperties(
             String keyword,
@@ -81,7 +160,7 @@ public class PropertyService {
         String normalizedKeyword = normalizeText(keyword);
         String normalizedCity = normalizeText(city);
         String normalizedType = normalizeText(propertyType);
-        String normalizedStatus = normalizeText(status);
+        Property.Status normalizedStatus = parseStatus(status);
 
         String keywordPattern = normalizedKeyword == null
                 ? null
@@ -135,6 +214,49 @@ public class PropertyService {
         return value.trim();
     }
 
+    private Property.Status parseStatus(String status) {
+        String normalizedStatus = normalizeText(status);
+
+        if (normalizedStatus == null) {
+            return null;
+        }
+
+        try {
+            return Property.Status.valueOf(
+                    normalizedStatus.toUpperCase(Locale.ROOT)
+            );
+        } catch (IllegalArgumentException exception) {
+            throw new InvalidSearchCriteriaException(
+                    "Unknown property status: " + status
+            );
+        }
+    }
+
+    private List<PropertyResponse> getPropertiesByStatus(
+            Property.Status status
+    ) {
+        return propertyRepository
+                .findAllByStatusOrderByCreatedAtDesc(status)
+                .stream()
+                .map(this::convertToResponse)
+                .toList();
+    }
+
+    private void requireStatus(
+            Property property,
+            Property.Status requiredStatus,
+            String action
+    ) {
+        if (property.getStatus() != requiredStatus) {
+            throw new InvalidPropertyStatusException(
+                    property.getId(),
+                    property.getStatus(),
+                    requiredStatus,
+                    action
+            );
+        }
+    }
+
     private Property findPropertyById(Long id) {
         return propertyRepository.findById(id)
                 .orElseThrow(() ->
@@ -150,6 +272,8 @@ public class PropertyService {
                 request,
                 property,
                 "id",
+                "status",
+                "rejectionReason",
                 "createdAt",
                 "updatedAt"
         );

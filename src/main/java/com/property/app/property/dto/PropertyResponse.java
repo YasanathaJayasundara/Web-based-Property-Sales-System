@@ -20,6 +20,7 @@ public class PropertyResponse {
     private String imageUrl;
     private Long sellerId;
     private Property.Status status;
+    private String rejectionReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -40,6 +41,7 @@ public class PropertyResponse {
             String imageUrl,
             Long sellerId,
             Property.Status status,
+            String rejectionReason,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
@@ -56,6 +58,7 @@ public class PropertyResponse {
         this.imageUrl = imageUrl;
         this.sellerId = sellerId;
         this.status = status;
+        this.rejectionReason = rejectionReason;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -162,6 +165,14 @@ public class PropertyResponse {
 
     public void setStatus(Property.Status status) {
         this.status = status;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
     }
 
     public LocalDateTime getCreatedAt() {

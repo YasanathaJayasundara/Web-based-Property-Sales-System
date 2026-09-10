@@ -41,6 +41,19 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidPropertyStatusException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPropertyStatus(
+            InvalidPropertyStatusException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                exception.getMessage(),
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidationErrors(
             MethodArgumentNotValidException exception,
