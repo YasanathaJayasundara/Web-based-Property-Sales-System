@@ -4,6 +4,8 @@ import com.property.app.property.model.Property;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PropertyResponse {
 
@@ -23,6 +25,7 @@ public class PropertyResponse {
     private String rejectionReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<PropertyImageResponse> images = new ArrayList<>();
 
     public PropertyResponse() {
     }
@@ -189,5 +192,13 @@ public class PropertyResponse {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public List<PropertyImageResponse> getImages() {
+        return images;
+    }
+
+    public void setImages(List<PropertyImageResponse> images) {
+        this.images = images;
     }
 }
