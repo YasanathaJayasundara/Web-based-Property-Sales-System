@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,6 +29,48 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(PropertyImageNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse>
+    handlePropertyImageNotFound(
+            PropertyImageNotFoundException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.NOT_FOUND,
+                exception.getMessage(),
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
+    @ExceptionHandler(InvalidPropertyImageException.class)
+    public ResponseEntity<ApiErrorResponse>
+    handleInvalidPropertyImage(
+            InvalidPropertyImageException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                exception.getMessage(),
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiErrorResponse>
+    handleMaximumUploadSize(
+            MaxUploadSizeExceededException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.PAYLOAD_TOO_LARGE,
+                "Image size cannot exceed 5 MB",
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
     @ExceptionHandler(InvalidSearchCriteriaException.class)
     public ResponseEntity<ApiErrorResponse> handleInvalidSearch(
             InvalidSearchCriteriaException exception,
@@ -42,7 +85,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidPropertyStatusException.class)
-    public ResponseEntity<ApiErrorResponse> handleInvalidPropertyStatus(
+    public ResponseEntity<ApiErrorResponse>
+    handleInvalidPropertyStatus(
             InvalidPropertyStatusException exception,
             HttpServletRequest request
     ) {
@@ -55,11 +99,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiErrorResponse> handleValidationErrors(
+    public ResponseEntity<ApiErrorResponse>
+    handleValidationErrors(
             MethodArgumentNotValidException exception,
             HttpServletRequest request
     ) {
-        Map<String, String> fieldErrors = new LinkedHashMap<>();
+        Map<String, String> fieldErrors =
+                new LinkedHashMap<>();
 
         exception.getBindingResult()
                 .getFieldErrors()
@@ -84,7 +130,8 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         String message =
-                "Invalid value for parameter: " + exception.getName();
+                "Invalid value for parameter: "
+                        + exception.getName();
 
         return buildResponse(
                 HttpStatus.BAD_REQUEST,
@@ -113,13 +160,14 @@ public class GlobalExceptionHandler {
             String path,
             Map<String, String> validationErrors
     ) {
-        ApiErrorResponse response = new ApiErrorResponse(
-                status.value(),
-                status.getReasonPhrase(),
-                message,
-                path,
-                validationErrors
-        );
+        ApiErrorResponse response =
+                new ApiErrorResponse(
+                        status.value(),
+                        status.getReasonPhrase(),
+                        message,
+                        path,
+                        validationErrors
+                );
 
         return ResponseEntity
                 .status(status)
