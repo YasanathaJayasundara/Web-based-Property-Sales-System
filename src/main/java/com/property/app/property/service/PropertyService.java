@@ -20,9 +20,14 @@ import java.util.Locale;
 public class PropertyService {
 
     private final PropertyRepository propertyRepository;
+    private final PropertyImageService propertyImageService;
 
-    public PropertyService(PropertyRepository propertyRepository) {
+    public PropertyService(
+            PropertyRepository propertyRepository,
+            PropertyImageService propertyImageService
+    ) {
         this.propertyRepository = propertyRepository;
+        this.propertyImageService = propertyImageService;
     }
 
     public PropertyResponse createProperty(PropertyRequest request) {
@@ -49,26 +54,36 @@ public class PropertyService {
 
     @Transactional(readOnly = true)
     public List<PropertyResponse> getPendingProperties() {
-        return getPropertiesByStatus(Property.Status.PENDING);
+        return getPropertiesByStatus(
+                Property.Status.PENDING
+        );
     }
 
     @Transactional(readOnly = true)
     public List<PropertyResponse> getPublishedProperties() {
-        return getPropertiesByStatus(Property.Status.PUBLISHED);
+        return getPropertiesByStatus(
+                Property.Status.PUBLISHED
+        );
     }
 
     @Transactional(readOnly = true)
     public PropertyResponse getPropertyById(Long id) {
-        return convertToResponse(findPropertyById(id));
+        Property property = findPropertyById(id);
+
+        return convertToResponse(property);
     }
 
     public PropertyResponse updateProperty(
             Long id,
             PropertyRequest request
     ) {
-        Property existingProperty = findPropertyById(id);
+        Property existingProperty =
+                findPropertyById(id);
 
-        copyRequestToProperty(request, existingProperty);
+        copyRequestToProperty(
+                request,
+                existingProperty
+        );
 
         Property updatedProperty =
                 propertyRepository.save(existingProperty);
@@ -77,7 +92,11 @@ public class PropertyService {
     }
 
     public void deleteProperty(Long id) {
-        Property existingProperty = findPropertyById(id);
+        Property existingProperty =
+                findPropertyById(id);
+
+        propertyImageService
+                .deleteAllImagesForProperty(id);
 
         propertyRepository.delete(existingProperty);
     }
@@ -85,7 +104,8 @@ public class PropertyService {
     public PropertyResponse approveProperty(Long id) {
         Property property = findPropertyById(id);
 
-        if (property.getStatus() == Property.Status.APPROVED) {
+        if (property.getStatus()
+                == Property.Status.APPROVED) {
             return convertToResponse(property);
         }
 
@@ -107,7 +127,8 @@ public class PropertyService {
     public PropertyResponse publishProperty(Long id) {
         Property property = findPropertyById(id);
 
-        if (property.getStatus() == Property.Status.PUBLISHED) {
+        if (property.getStatus()
+                == Property.Status.PUBLISHED) {
             return convertToResponse(property);
         }
 
@@ -157,14 +178,22 @@ public class PropertyService {
     ) {
         validatePriceRange(minPrice, maxPrice);
 
-        String normalizedKeyword = normalizeText(keyword);
-        String normalizedCity = normalizeText(city);
-        String normalizedType = normalizeText(propertyType);
-        Property.Status normalizedStatus = parseStatus(status);
+        String normalizedKeyword =
+                normalizeText(keyword);
 
-        String keywordPattern = normalizedKeyword == null
-                ? null
-                : "%" + normalizedKeyword + "%";
+        String normalizedCity =
+                normalizeText(city);
+
+        String normalizedType =
+                normalizeText(propertyType);
+
+        Property.Status normalizedStatus =
+                parseStatus(status);
+
+        String keywordPattern =
+                normalizedKeyword == null
+                        ? null
+                        : "%" + normalizedKeyword + "%";
 
         return propertyRepository.searchProperties(
                         keywordPattern,
@@ -215,7 +244,8 @@ public class PropertyService {
     }
 
     private Property.Status parseStatus(String status) {
-        String normalizedStatus = normalizeText(status);
+        String normalizedStatus =
+                normalizeText(status);
 
         if (normalizedStatus == null) {
             return null;
@@ -223,8 +253,11 @@ public class PropertyService {
 
         try {
             return Property.Status.valueOf(
-                    normalizedStatus.toUpperCase(Locale.ROOT)
+                    normalizedStatus.toUpperCase(
+                            Locale.ROOT
+                    )
             );
+
         } catch (IllegalArgumentException exception) {
             throw new InvalidSearchCriteriaException(
                     "Unknown property status: " + status
@@ -272,6 +305,7 @@ public class PropertyService {
                 request,
                 property,
                 "id",
+                "imageUrl",
                 "status",
                 "rejectionReason",
                 "createdAt",
@@ -279,10 +313,23 @@ public class PropertyService {
         );
     }
 
-    private PropertyResponse convertToResponse(Property property) {
-        PropertyResponse response = new PropertyResponse();
+    private PropertyResponse convertToResponse(
+            Property property
+    ) {
+        PropertyResponse response =
+                new PropertyResponse();
 
-        BeanUtils.copyProperties(property, response);
+        BeanUtils.copyProperties(
+                property,
+                response
+        );
+
+        response.setImages(
+                propertyImageService
+                        .getImagesForProperty(
+                                property.getId()
+                        )
+        );
 
         return response;
     }
