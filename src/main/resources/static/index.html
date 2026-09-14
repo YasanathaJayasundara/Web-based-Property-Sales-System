@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+            name="description"
+            content="Browse published property listings"
+    >
+
+    <title>PropertyHub | Browse Properties</title>
+
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+</head>
+
+<body>
+
+<header class="site-header">
+
+    <a class="brand" href="/">
+        <span class="brand-logo">PH</span>
+        <span>PropertyHub</span>
+    </a>
+
+    <span class="header-label">
+        Property Listing Management
+    </span>
+
+</header>
+
+<main>
+
+    <section class="hero">
+
+        <div class="container">
+
+            <p class="eyebrow">
+                WEB-BASED PROPERTY SALES SYSTEM
+            </p>
+
+            <h1>Find your next property</h1>
+
+            <p>
+                Browse approved and published property
+                listings in one place.
+            </p>
+
+        </div>
+
+    </section>
+
+    <section
+            class="container search-panel"
+            aria-labelledby="search-title"
+    >
+
+        <div class="section-title">
+
+            <div>
+                <p class="eyebrow green">SEARCH</p>
+                <h2 id="search-title">Filter properties</h2>
+            </div>
+
+            <span>Only published properties are displayed</span>
+
+        </div>
+
+        <form id="search-form" class="search-form">
+
+            <label class="wide-field">
+                Keyword
+
+                <input
+                        name="keyword"
+                        type="search"
+                        placeholder="Title, description or location"
+                        maxlength="120"
+                >
+            </label>
+
+            <label>
+                City
+
+                <input
+                        name="city"
+                        type="text"
+                        placeholder="Colombo"
+                        maxlength="100"
+                >
+            </label>
+
+            <label>
+                Property type
+
+                <select name="propertyType">
+                    <option value="">All types</option>
+                    <option value="HOUSE">House</option>
+                    <option value="APARTMENT">Apartment</option>
+                    <option value="LAND">Land</option>
+                    <option value="COMMERCIAL">Commercial</option>
+                </select>
+            </label>
+
+            <label>
+                Minimum price (LKR)
+
+                <input
+                        name="minPrice"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0"
+                >
+            </label>
+
+            <label>
+                Maximum price (LKR)
+
+                <input
+                        name="maxPrice"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="Any price"
+                >
+            </label>
+
+            <div class="form-buttons">
+
+                <button
+                        class="primary-button"
+                        type="submit"
+                >
+                    Search
+                </button>
+
+                <button
+                        class="secondary-button"
+                        type="reset"
+                >
+                    Clear
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+    <section
+            class="container results-section"
+            aria-labelledby="results-title"
+    >
+
+        <div class="results-header">
+
+            <div>
+                <p
+                        id="result-summary"
+                        class="eyebrow green"
+                >
+                    LOADING
+                </p>
+
+                <h2 id="results-title">
+                    Published properties
+                </h2>
+            </div>
+
+            <button
+                    id="refresh-button"
+                    class="secondary-button"
+                    type="button"
+            >
+                Refresh
+            </button>
+
+        </div>
+
+        <p
+                id="message"
+                class="message"
+                role="status"
+                hidden
+        ></p>
+
+        <p
+                id="loading"
+                class="loading"
+                hidden
+        >
+            Loading property listings...
+        </p>
+
+        <div
+                id="property-grid"
+                class="property-grid"
+        ></div>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>&copy; 2026 PropertyHub</p>
+</footer>
+
+</body>
+</html>
