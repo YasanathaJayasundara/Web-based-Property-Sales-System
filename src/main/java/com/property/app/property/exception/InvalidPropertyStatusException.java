@@ -4,6 +4,10 @@ import com.property.app.property.model.Property;
 
 public class InvalidPropertyStatusException extends RuntimeException {
 
+    public InvalidPropertyStatusException(String message) {
+        super(message);
+    }
+
     public InvalidPropertyStatusException(
             Long propertyId,
             Property.Status currentStatus,
