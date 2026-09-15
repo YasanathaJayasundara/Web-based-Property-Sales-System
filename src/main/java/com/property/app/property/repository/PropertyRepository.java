@@ -35,6 +35,10 @@ public interface PropertyRepository
                 OR p.status = :status
             )
             AND (
+                :sellerId IS NULL
+                OR p.sellerId = :sellerId
+            )
+            AND (
                 :minPrice IS NULL
                 OR p.price >= :minPrice
             )
@@ -49,11 +53,16 @@ public interface PropertyRepository
             @Param("city") String city,
             @Param("propertyType") String propertyType,
             @Param("status") Property.Status status,
+            @Param("sellerId") Long sellerId,
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice
     );
 
     List<Property> findAllByStatusOrderByCreatedAtDesc(
             Property.Status status
+    );
+
+    List<Property> findAllBySellerIdOrderByCreatedAtDesc(
+            Long sellerId
     );
 }
