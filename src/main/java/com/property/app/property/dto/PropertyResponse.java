@@ -25,6 +25,7 @@ public class PropertyResponse {
     private String rejectionReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long version;
     private List<PropertyImageResponse> images = new ArrayList<>();
 
     public PropertyResponse() {
@@ -192,6 +193,14 @@ public class PropertyResponse {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     public List<PropertyImageResponse> getImages() {
