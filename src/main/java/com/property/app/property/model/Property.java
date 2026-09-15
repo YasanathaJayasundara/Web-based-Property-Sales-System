@@ -14,7 +14,8 @@ public class Property {
         APPROVED,
         PUBLISHED,
         REJECTED,
-        SOLD
+        SOLD,
+        ARCHIVED
     }
 
     @Id
@@ -27,13 +28,13 @@ public class Property {
     @Column(nullable = false, length = 2000)
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String location;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String city;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String propertyType;
 
     @Column(nullable = false, precision = 12, scale = 2)
@@ -63,6 +64,9 @@ public class Property {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @Version
+    private Long version;
 
     public Property() {
     }
@@ -218,5 +222,9 @@ public class Property {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 }
