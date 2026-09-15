@@ -49,9 +49,6 @@ public class PropertyRequest {
         @Positive(message = "Seller ID must be greater than zero")
         private Long sellerId;
 
-        @Size(max = 500, message = "Image URL cannot exceed 500 characters")
-        private String imageUrl;
-
         public PropertyRequest() {
         }
 
@@ -135,11 +132,4 @@ public class PropertyRequest {
                 this.sellerId = sellerId;
         }
 
-        public String getImageUrl() {
-                return imageUrl;
-        }
-
-        public void setImageUrl(String imageUrl) {
-                this.imageUrl = imageUrl;
-        }
 }
