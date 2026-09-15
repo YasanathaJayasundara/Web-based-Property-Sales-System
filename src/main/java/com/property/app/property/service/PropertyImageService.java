@@ -2,6 +2,7 @@ package com.property.app.property.service;
 
 import com.property.app.property.dto.PropertyImageResponse;
 import com.property.app.property.exception.InvalidPropertyImageException;
+import com.property.app.property.exception.InvalidPropertyStatusException;
 import com.property.app.property.exception.PropertyImageNotFoundException;
 import com.property.app.property.exception.PropertyNotFoundException;
 import com.property.app.property.model.Property;
@@ -59,6 +60,7 @@ public class PropertyImageService {
             MultipartFile file
     ) {
         Property property = findProperty(propertyId);
+        requireImageChangesAllowed(property);
 
         validateImage(propertyId, file);
 
@@ -134,6 +136,7 @@ public class PropertyImageService {
             Long imageId
     ) {
         Property property = findProperty(propertyId);
+        requireImageChangesAllowed(property);
 
         PropertyImage selectedImage =
                 findImage(propertyId, imageId);
@@ -169,6 +172,7 @@ public class PropertyImageService {
             Long imageId
     ) {
         Property property = findProperty(propertyId);
+        requireImageChangesAllowed(property);
 
         PropertyImage image =
                 findImage(propertyId, imageId);
@@ -268,6 +272,17 @@ public class PropertyImageService {
                                 propertyId
                         )
                 );
+    }
+
+    private void requireImageChangesAllowed(Property property) {
+        if (property.getStatus() == Property.Status.SOLD
+                || property.getStatus() == Property.Status.ARCHIVED) {
+            throw new InvalidPropertyStatusException(
+                    "Images cannot be changed while property "
+                            + property.getId() + " is "
+                            + property.getStatus()
+            );
+        }
     }
 
     private PropertyImage findImage(
