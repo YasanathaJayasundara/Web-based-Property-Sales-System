@@ -55,12 +55,22 @@ public class PropertyController {
         );
     }
 
+    @GetMapping("/seller/{sellerId}")
+    public ResponseEntity<List<PropertyResponse>> getSellerProperties(
+            @PathVariable Long sellerId
+    ) {
+        return ResponseEntity.ok(
+                propertyService.getSellerProperties(sellerId)
+        );
+    }
+
     @GetMapping("/search")
     public ResponseEntity<List<PropertyResponse>> searchProperties(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String propertyType,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long sellerId,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice
     ) {
@@ -70,6 +80,7 @@ public class PropertyController {
                         city,
                         propertyType,
                         status,
+                        sellerId,
                         minPrice,
                         maxPrice
                 )
@@ -123,6 +134,33 @@ public class PropertyController {
                         id,
                         request.getReason()
                 )
+        );
+    }
+
+    @PatchMapping("/{id}/resubmit")
+    public ResponseEntity<PropertyResponse> resubmitProperty(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(
+                propertyService.resubmitProperty(id)
+        );
+    }
+
+    @PatchMapping("/{id}/sold")
+    public ResponseEntity<PropertyResponse> markPropertyAsSold(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(
+                propertyService.markPropertyAsSold(id)
+        );
+    }
+
+    @PatchMapping("/{id}/archive")
+    public ResponseEntity<PropertyResponse> archiveProperty(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(
+                propertyService.archiveProperty(id)
         );
     }
 
