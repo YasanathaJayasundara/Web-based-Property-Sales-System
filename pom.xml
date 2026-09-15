@@ -15,7 +15,7 @@
     <artifactId>property-listing-management</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Property Listing Management</name>
-    <description>Blank starter structure for the Property Listing Management module</description>
+    <description>Complete Property Listing Management module for the Web-based Property Sales System</description>
 
     <properties>
         <java.version>17</java.version>
@@ -55,4 +55,3 @@
         </plugins>
     </build>
 </project>
-
