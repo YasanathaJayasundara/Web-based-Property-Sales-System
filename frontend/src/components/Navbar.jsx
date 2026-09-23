@@ -1,10 +1,20 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { getUnreadCount } from "../data/reviewApi";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    const uid = user.databaseId || user.id;
+    getUnreadCount(uid)
+      .then((count) => setUnreadCount(Number(count) || 0))
+      .catch(() => setUnreadCount(0));
+  }, [user]);
 
   function handleLogout() {
     logout();
@@ -15,6 +25,12 @@ export default function Navbar() {
     color: isActive ? "var(--gold)" : "white",
     fontWeight: 600,
     fontSize: "0.92rem",
+    textDecoration: "none",
+    padding: "6px 8px",
+    borderRadius: "4px",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "4px",
   });
 
   return (
@@ -29,7 +45,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <nav className="flex gap-16" style={{ alignItems: "center" }}>
+        <nav className="flex gap-12" style={{ alignItems: "center", flexWrap: "wrap" }}>
           <NavLink to="/" style={linkStyle} end>Browse</NavLink>
           {user && (user.role === "SELLER" || user.role === "AGENT") && (
             <NavLink to="/my-listings" style={linkStyle}>My Listings</NavLink>
@@ -41,10 +57,13 @@ export default function Navbar() {
             <NavLink to="/offers" style={linkStyle}>Offers</NavLink>
           )}
           {user && user.role === "BUYER" && (
-            <NavLink to="/reviews" style={linkStyle}>Reviews</NavLink>
+            <>
+              <NavLink to="/reviews" style={linkStyle}>Reviews</NavLink>
+              <NavLink to="/payments" style={linkStyle}>Payments</NavLink>
+            </>
           )}
-          {user && user.role === "BUYER" && (
-            <NavLink to="/payments" style={linkStyle}>Payments</NavLink>
+          {user && (user.role === "ADMIN" || user.role === "AGENT") && (
+            <NavLink to="/promotions" style={linkStyle}>Ads & Promos</NavLink>
           )}
           {user && user.role === "ADMIN" && (
             <>
@@ -53,7 +72,23 @@ export default function Navbar() {
             </>
           )}
           {user ? (
-            <div className="flex gap-12" style={{ alignItems: "center", marginLeft: 8 }}>
+            <div className="flex gap-8" style={{ alignItems: "center", marginLeft: 8 }}>
+              {unreadCount > 0 && (
+                <NavLink to="/reviews" title={`${unreadCount} unread notifications`} style={{ ...linkStyle({ isActive: false }), position: "relative" }}>
+                  🔔
+                  <span style={{
+                    background: "var(--danger)",
+                    color: "white",
+                    borderRadius: "50%",
+                    fontSize: "0.65rem",
+                    padding: "1px 5px",
+                    fontWeight: 700,
+                    marginLeft: -4
+                  }}>
+                    {unreadCount}
+                  </span>
+                </NavLink>
+              )}
               <NavLink to="/profile" style={linkStyle}>{user.name.split(" ")[0]}</NavLink>
               <button className="btn btn-gold btn-sm" onClick={handleLogout}>Log out</button>
             </div>

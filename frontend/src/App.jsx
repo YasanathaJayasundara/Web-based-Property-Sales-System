@@ -17,6 +17,7 @@ import Payments from "./pages/Payments";
 import Reviews from "./pages/Reviews";
 import AdminDashboard from "./pages/AdminDashboard";
 import ReportsAnalytics from "./pages/ReportsAnalytics";
+import Promotions from "./pages/Promotions";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -80,6 +81,11 @@ export default function App() {
               {/* Reports & Analytics Dashboard (Admin) */}
               <Route path="/reports" element={
                 <ProtectedRoute roles={["ADMIN"]}><ReportsAnalytics /></ProtectedRoute>
+              } />
+
+              {/* Advertisements & Promotions Management (Shavindi T.D.P. - Admin/Agent) */}
+              <Route path="/promotions" element={
+                <ProtectedRoute roles={["ADMIN", "AGENT"]}><Promotions /></ProtectedRoute>
               } />
 
               <Route path="*" element={<NotFound />} />
