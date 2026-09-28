@@ -11,22 +11,38 @@ import java.math.BigDecimal;
 public class PropertyRequest {
 
         @NotBlank(message = "Title is required")
-        @Size(max = 120, message = "Title cannot exceed 120 characters")
+        @Size(
+                max = 120,
+                message = "Title cannot exceed 120 characters"
+        )
         private String title;
 
         @NotBlank(message = "Description is required")
-        @Size(max = 2000, message = "Description cannot exceed 2000 characters")
+        @Size(
+                max = 2000,
+                message = "Description cannot exceed 2000 characters"
+        )
         private String description;
 
         @NotBlank(message = "Property type is required")
+        @Size(
+                max = 100,
+                message = "Property type cannot exceed 100 characters"
+        )
         private String propertyType;
 
         @NotBlank(message = "Location is required")
-        @Size(max = 255, message = "Location cannot exceed 255 characters")
+        @Size(
+                max = 255,
+                message = "Location cannot exceed 255 characters"
+        )
         private String location;
 
         @NotBlank(message = "City is required")
-        @Size(max = 100, message = "City cannot exceed 100 characters")
+        @Size(
+                max = 100,
+                message = "City cannot exceed 100 characters"
+        )
         private String city;
 
         @NotNull(message = "Price is required")
@@ -34,11 +50,15 @@ public class PropertyRequest {
         private BigDecimal price;
 
         @NotNull(message = "Number of bedrooms is required")
-        @PositiveOrZero(message = "Bedrooms cannot be negative")
+        @PositiveOrZero(
+                message = "Bedrooms cannot be negative"
+        )
         private Integer bedrooms;
 
         @NotNull(message = "Number of bathrooms is required")
-        @PositiveOrZero(message = "Bathrooms cannot be negative")
+        @PositiveOrZero(
+                message = "Bathrooms cannot be negative"
+        )
         private Integer bathrooms;
 
         @NotNull(message = "Area is required")
@@ -49,6 +69,12 @@ public class PropertyRequest {
         @Positive(message = "Seller ID must be greater than zero")
         private Long sellerId;
 
+        @Size(
+                max = 500,
+                message = "Image URL cannot exceed 500 characters"
+        )
+        private String imageUrl;
+
         public PropertyRequest() {
         }
 
@@ -56,7 +82,9 @@ public class PropertyRequest {
                 return title;
         }
 
-        public void setTitle(String title) {
+        public void setTitle(
+                String title
+        ) {
                 this.title = title;
         }
 
@@ -64,7 +92,9 @@ public class PropertyRequest {
                 return description;
         }
 
-        public void setDescription(String description) {
+        public void setDescription(
+                String description
+        ) {
                 this.description = description;
         }
 
@@ -72,7 +102,9 @@ public class PropertyRequest {
                 return propertyType;
         }
 
-        public void setPropertyType(String propertyType) {
+        public void setPropertyType(
+                String propertyType
+        ) {
                 this.propertyType = propertyType;
         }
 
@@ -80,7 +112,9 @@ public class PropertyRequest {
                 return location;
         }
 
-        public void setLocation(String location) {
+        public void setLocation(
+                String location
+        ) {
                 this.location = location;
         }
 
@@ -88,7 +122,9 @@ public class PropertyRequest {
                 return city;
         }
 
-        public void setCity(String city) {
+        public void setCity(
+                String city
+        ) {
                 this.city = city;
         }
 
@@ -96,7 +132,9 @@ public class PropertyRequest {
                 return price;
         }
 
-        public void setPrice(BigDecimal price) {
+        public void setPrice(
+                BigDecimal price
+        ) {
                 this.price = price;
         }
 
@@ -104,7 +142,9 @@ public class PropertyRequest {
                 return bedrooms;
         }
 
-        public void setBedrooms(Integer bedrooms) {
+        public void setBedrooms(
+                Integer bedrooms
+        ) {
                 this.bedrooms = bedrooms;
         }
 
@@ -112,7 +152,9 @@ public class PropertyRequest {
                 return bathrooms;
         }
 
-        public void setBathrooms(Integer bathrooms) {
+        public void setBathrooms(
+                Integer bathrooms
+        ) {
                 this.bathrooms = bathrooms;
         }
 
@@ -120,7 +162,9 @@ public class PropertyRequest {
                 return area;
         }
 
-        public void setArea(Double area) {
+        public void setArea(
+                Double area
+        ) {
                 this.area = area;
         }
 
@@ -128,8 +172,19 @@ public class PropertyRequest {
                 return sellerId;
         }
 
-        public void setSellerId(Long sellerId) {
+        public void setSellerId(
+                Long sellerId
+        ) {
                 this.sellerId = sellerId;
         }
 
+        public String getImageUrl() {
+                return imageUrl;
+        }
+
+        public void setImageUrl(
+                String imageUrl
+        ) {
+                this.imageUrl = imageUrl;
+        }
 }

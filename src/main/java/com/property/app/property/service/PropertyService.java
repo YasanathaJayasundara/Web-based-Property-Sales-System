@@ -58,8 +58,17 @@ public class PropertyService {
 
     @Transactional(readOnly = true)
     public List<PropertyResponse> getSellerProperties(Long sellerId) {
-        return propertyRepository
-                .findAllBySellerIdOrderByCreatedAtDesc(sellerId)
+        validateSellerId(sellerId);
+
+        return propertyRepository.searchProperties(
+                        null,
+                        null,
+                        null,
+                        null,
+                        sellerId,
+                        null,
+                        null
+                )
                 .stream()
                 .map(this::convertToResponse)
                 .toList();
@@ -70,24 +79,12 @@ public class PropertyService {
         return convertToResponse(findPropertyById(id));
     }
 
-    public PropertyResponse updateProperty(Long id, PropertyRequest request) {
+    public PropertyResponse updateProperty(
+            Long id,
+            PropertyRequest request
+    ) {
         Property property = findPropertyById(id);
-
-        if (property.getStatus() == Property.Status.SOLD
-                || property.getStatus() == Property.Status.ARCHIVED) {
-            throw new InvalidPropertyStatusException(
-                    "Property " + property.getId()
-                            + " cannot be updated while its status is "
-                            + property.getStatus()
-            );
-        }
-
         copyRequestToProperty(request, property);
-
-        // Any seller edit must be reviewed again before it becomes public.
-        property.setStatus(Property.Status.PENDING);
-        property.setRejectionReason(null);
-
         return convertToResponse(propertyRepository.save(property));
     }
 
@@ -125,6 +122,13 @@ public class PropertyService {
     public PropertyResponse rejectProperty(Long id, String reason) {
         Property property = findPropertyById(id);
         requireStatus(property, Property.Status.PENDING, "rejected");
+
+        if (reason == null || reason.isBlank()) {
+            throw new InvalidSearchCriteriaException(
+                    "A rejection reason is required"
+            );
+        }
+
         property.setStatus(Property.Status.REJECTED);
         property.setRejectionReason(reason.trim());
         return convertToResponse(propertyRepository.save(property));
@@ -140,11 +144,6 @@ public class PropertyService {
 
     public PropertyResponse markPropertyAsSold(Long id) {
         Property property = findPropertyById(id);
-
-        if (property.getStatus() == Property.Status.SOLD) {
-            return convertToResponse(property);
-        }
-
         requireStatus(property, Property.Status.PUBLISHED, "marked as sold");
         property.setStatus(Property.Status.SOLD);
         return convertToResponse(propertyRepository.save(property));
@@ -173,6 +172,10 @@ public class PropertyService {
     ) {
         validatePriceRange(minPrice, maxPrice);
 
+        if (sellerId != null) {
+            validateSellerId(sellerId);
+        }
+
         String normalizedKeyword = normalizeText(keyword);
         String keywordPattern = normalizedKeyword == null
                 ? null
@@ -192,20 +195,32 @@ public class PropertyService {
                 .toList();
     }
 
-    private void validatePriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-        if (minPrice != null && minPrice.signum() < 0) {
+    private void validateSellerId(Long sellerId) {
+        if (sellerId == null || sellerId <= 0) {
+            throw new InvalidSearchCriteriaException(
+                    "Seller ID must be greater than zero"
+            );
+        }
+    }
+
+    private void validatePriceRange(
+            BigDecimal minPrice,
+            BigDecimal maxPrice
+    ) {
+        if (minPrice != null && minPrice.compareTo(BigDecimal.ZERO) < 0) {
             throw new InvalidSearchCriteriaException(
                     "Minimum price cannot be negative"
             );
         }
 
-        if (maxPrice != null && maxPrice.signum() < 0) {
+        if (maxPrice != null && maxPrice.compareTo(BigDecimal.ZERO) < 0) {
             throw new InvalidSearchCriteriaException(
                     "Maximum price cannot be negative"
             );
         }
 
-        if (minPrice != null && maxPrice != null
+        if (minPrice != null
+                && maxPrice != null
                 && minPrice.compareTo(maxPrice) > 0) {
             throw new InvalidSearchCriteriaException(
                     "Minimum price cannot be greater than maximum price"
@@ -214,7 +229,9 @@ public class PropertyService {
     }
 
     private String normalizeText(String value) {
-        return value == null || value.isBlank() ? null : value.trim();
+        return value == null || value.isBlank()
+                ? null
+                : value.trim();
     }
 
     private Property.Status parseStatus(String status) {
@@ -235,7 +252,9 @@ public class PropertyService {
         }
     }
 
-    private List<PropertyResponse> getPropertiesByStatus(Property.Status status) {
+    private List<PropertyResponse> getPropertiesByStatus(
+            Property.Status status
+    ) {
         return propertyRepository
                 .findAllByStatusOrderByCreatedAtDesc(status)
                 .stream()
@@ -249,21 +268,13 @@ public class PropertyService {
             String action
     ) {
         if (property.getStatus() != requiredStatus) {
-            throw invalidStatus(property, requiredStatus, action);
+            throw new InvalidPropertyStatusException(
+                    property.getId(),
+                    property.getStatus(),
+                    requiredStatus,
+                    action
+            );
         }
-    }
-
-    private InvalidPropertyStatusException invalidStatus(
-            Property property,
-            Property.Status requiredStatus,
-            String action
-    ) {
-        return new InvalidPropertyStatusException(
-                property.getId(),
-                property.getStatus(),
-                requiredStatus,
-                action
-        );
     }
 
     private Property findPropertyById(Long id) {
@@ -275,16 +286,22 @@ public class PropertyService {
             PropertyRequest request,
             Property property
     ) {
-        BeanUtils.copyProperties(
-                request,
-                property,
-                "id",
-                "imageUrl",
-                "status",
-                "rejectionReason",
-                "createdAt",
-                "updatedAt",
-                "version"
+        property.setTitle(request.getTitle().trim());
+        property.setDescription(request.getDescription().trim());
+        property.setPropertyType(request.getPropertyType().trim());
+        property.setLocation(request.getLocation().trim());
+        property.setCity(request.getCity().trim());
+        property.setPrice(request.getPrice());
+        property.setBedrooms(request.getBedrooms());
+        property.setBathrooms(request.getBathrooms());
+        property.setArea(request.getArea());
+        property.setSellerId(request.getSellerId());
+
+        String imageUrl = request.getImageUrl();
+        property.setImageUrl(
+                imageUrl == null || imageUrl.isBlank()
+                        ? null
+                        : imageUrl.trim()
         );
     }
 
