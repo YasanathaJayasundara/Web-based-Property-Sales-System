@@ -2,7 +2,6 @@ package com.property.app.property.service;
 
 import com.property.app.property.dto.PropertyImageResponse;
 import com.property.app.property.exception.InvalidPropertyImageException;
-import com.property.app.property.exception.InvalidPropertyStatusException;
 import com.property.app.property.exception.PropertyImageNotFoundException;
 import com.property.app.property.exception.PropertyNotFoundException;
 import com.property.app.property.model.Property;
@@ -27,9 +26,7 @@ import java.util.UUID;
 @Transactional
 public class PropertyImageService {
 
-    private static final long MAX_IMAGE_SIZE =
-            5L * 1024L * 1024L;
-
+    private static final long MAX_IMAGE_SIZE = 5L * 1024L * 1024L;
     private static final long MAX_IMAGES_PER_PROPERTY = 10L;
 
     private static final Set<String> ALLOWED_CONTENT_TYPES =
@@ -47,11 +44,9 @@ public class PropertyImageService {
     ) {
         this.propertyImageRepository = propertyImageRepository;
         this.propertyRepository = propertyRepository;
-
         this.uploadPath = Path.of(uploadDirectory)
                 .toAbsolutePath()
                 .normalize();
-
         createUploadDirectory();
     }
 
@@ -61,20 +56,14 @@ public class PropertyImageService {
     ) {
         Property property = findProperty(propertyId);
         requireImageChangesAllowed(property);
-
         validateImage(propertyId, file);
 
         String contentType = file.getContentType();
-
         String extension = "image/png".equals(contentType)
                 ? ".png"
                 : ".jpg";
-
-        String storedFileName =
-                UUID.randomUUID() + extension;
-
-        Path destination =
-                safeDestination(storedFileName);
+        String storedFileName = UUID.randomUUID() + extension;
+        Path destination = safeDestination(storedFileName);
 
         storeFile(file, destination);
 
@@ -83,16 +72,11 @@ public class PropertyImageService {
                     .countByPropertyId(propertyId) == 0;
 
             PropertyImage image = new PropertyImage();
-
             image.setPropertyId(propertyId);
             image.setStoredFileName(storedFileName);
-
             image.setOriginalFileName(
-                    safeOriginalFileName(
-                            file.getOriginalFilename()
-                    )
+                    safeOriginalFileName(file.getOriginalFilename())
             );
-
             image.setContentType(contentType);
             image.setFileSize(file.getSize());
             image.setPrimaryImage(firstImage);
@@ -101,15 +85,11 @@ public class PropertyImageService {
                     propertyImageRepository.save(image);
 
             if (firstImage) {
-                property.setImageUrl(
-                        buildImageUrl(storedFileName)
-                );
-
+                property.setImageUrl(buildImageUrl(storedFileName));
                 propertyRepository.save(property);
             }
 
             return convertToResponse(savedImage);
-
         } catch (RuntimeException exception) {
             deleteFileQuietly(destination);
             throw exception;
@@ -123,9 +103,7 @@ public class PropertyImageService {
         findProperty(propertyId);
 
         return propertyImageRepository
-                .findAllByPropertyIdOrderByUploadedAtAsc(
-                        propertyId
-                )
+                .findAllByPropertyIdOrderByUploadedAtAsc(propertyId)
                 .stream()
                 .map(this::convertToResponse)
                 .toList();
@@ -137,76 +115,47 @@ public class PropertyImageService {
     ) {
         Property property = findProperty(propertyId);
         requireImageChangesAllowed(property);
-
-        PropertyImage selectedImage =
-                findImage(propertyId, imageId);
+        PropertyImage selectedImage = findImage(propertyId, imageId);
 
         List<PropertyImage> images = propertyImageRepository
-                .findAllByPropertyIdOrderByUploadedAtAsc(
-                        propertyId
-                );
+                .findAllByPropertyIdOrderByUploadedAtAsc(propertyId);
 
         for (PropertyImage image : images) {
-            image.setPrimaryImage(
-                    image.getId().equals(imageId)
-            );
+            image.setPrimaryImage(image.getId().equals(imageId));
         }
 
         propertyImageRepository.saveAll(images);
-
         property.setImageUrl(
-                buildImageUrl(
-                        selectedImage.getStoredFileName()
-                )
+                buildImageUrl(selectedImage.getStoredFileName())
         );
-
         propertyRepository.save(property);
-
         selectedImage.setPrimaryImage(true);
 
         return convertToResponse(selectedImage);
     }
 
-    public void deleteImage(
-            Long propertyId,
-            Long imageId
-    ) {
+    public void deleteImage(Long propertyId, Long imageId) {
         Property property = findProperty(propertyId);
         requireImageChangesAllowed(property);
-
-        PropertyImage image =
-                findImage(propertyId, imageId);
-
-        boolean deletedPrimaryImage =
-                image.isPrimaryImage();
+        PropertyImage image = findImage(propertyId, imageId);
+        boolean deletedPrimaryImage = image.isPrimaryImage();
 
         propertyImageRepository.delete(image);
         propertyImageRepository.flush();
-
         deleteStoredFile(image.getStoredFileName());
 
         if (deletedPrimaryImage) {
-            PropertyImage nextPrimaryImage =
-                    propertyImageRepository
-                            .findFirstByPropertyIdOrderByUploadedAtAsc(
-                                    propertyId
-                            )
-                            .orElse(null);
+            PropertyImage nextPrimaryImage = propertyImageRepository
+                    .findFirstByPropertyIdOrderByUploadedAtAsc(propertyId)
+                    .orElse(null);
 
             if (nextPrimaryImage == null) {
                 property.setImageUrl(null);
             } else {
                 nextPrimaryImage.setPrimaryImage(true);
-
-                propertyImageRepository.save(
-                        nextPrimaryImage
-                );
-
+                propertyImageRepository.save(nextPrimaryImage);
                 property.setImageUrl(
-                        buildImageUrl(
-                                nextPrimaryImage
-                                        .getStoredFileName()
-                        )
+                        buildImageUrl(nextPrimaryImage.getStoredFileName())
                 );
             }
 
@@ -214,28 +163,18 @@ public class PropertyImageService {
         }
     }
 
-    public void deleteAllImagesForProperty(
-            Long propertyId
-    ) {
+    public void deleteAllImagesForProperty(Long propertyId) {
         List<PropertyImage> images = propertyImageRepository
-                .findAllByPropertyIdOrderByUploadedAtAsc(
-                        propertyId
-                );
+                .findAllByPropertyIdOrderByUploadedAtAsc(propertyId);
 
         for (PropertyImage image : images) {
-            deleteStoredFile(
-                    image.getStoredFileName()
-            );
+            deleteStoredFile(image.getStoredFileName());
         }
 
-        propertyImageRepository
-                .deleteAllByPropertyId(propertyId);
+        propertyImageRepository.deleteAllByPropertyId(propertyId);
     }
 
-    private void validateImage(
-            Long propertyId,
-            MultipartFile file
-    ) {
+    private void validateImage(Long propertyId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new InvalidPropertyImageException(
                     "Please select a non-empty image"
@@ -248,16 +187,13 @@ public class PropertyImageService {
             );
         }
 
-        if (!ALLOWED_CONTENT_TYPES.contains(
-                file.getContentType()
-        )) {
+        if (!ALLOWED_CONTENT_TYPES.contains(file.getContentType())) {
             throw new InvalidPropertyImageException(
                     "Only JPEG and PNG images are allowed"
             );
         }
 
-        if (propertyImageRepository
-                .countByPropertyId(propertyId)
+        if (propertyImageRepository.countByPropertyId(propertyId)
                 >= MAX_IMAGES_PER_PROPERTY) {
             throw new InvalidPropertyImageException(
                     "A property can contain a maximum of 10 images"
@@ -268,32 +204,25 @@ public class PropertyImageService {
     private Property findProperty(Long propertyId) {
         return propertyRepository.findById(propertyId)
                 .orElseThrow(() ->
-                        new PropertyNotFoundException(
-                                propertyId
-                        )
+                        new PropertyNotFoundException(propertyId)
                 );
     }
 
     private void requireImageChangesAllowed(Property property) {
         if (property.getStatus() == Property.Status.SOLD
                 || property.getStatus() == Property.Status.ARCHIVED) {
-            throw new InvalidPropertyStatusException(
+            throw new InvalidPropertyImageException(
                     "Images cannot be changed while property "
-                            + property.getId() + " is "
+                            + property.getId()
+                            + " is "
                             + property.getStatus()
             );
         }
     }
 
-    private PropertyImage findImage(
-            Long propertyId,
-            Long imageId
-    ) {
+    private PropertyImage findImage(Long propertyId, Long imageId) {
         return propertyImageRepository
-                .findByIdAndPropertyId(
-                        imageId,
-                        propertyId
-                )
+                .findByIdAndPropertyId(imageId, propertyId)
                 .orElseThrow(() ->
                         new PropertyImageNotFoundException(
                                 propertyId,
@@ -305,7 +234,6 @@ public class PropertyImageService {
     private void createUploadDirectory() {
         try {
             Files.createDirectories(uploadPath);
-
         } catch (IOException exception) {
             throw new IllegalStateException(
                     "Could not create the property image directory",
@@ -314,9 +242,7 @@ public class PropertyImageService {
         }
     }
 
-    private Path safeDestination(
-            String storedFileName
-    ) {
+    private Path safeDestination(String storedFileName) {
         Path destination = uploadPath
                 .resolve(storedFileName)
                 .normalize();
@@ -330,19 +256,13 @@ public class PropertyImageService {
         return destination;
     }
 
-    private void storeFile(
-            MultipartFile file,
-            Path destination
-    ) {
-        try (InputStream inputStream =
-                     file.getInputStream()) {
-
+    private void storeFile(MultipartFile file, Path destination) {
+        try (InputStream inputStream = file.getInputStream()) {
             Files.copy(
                     inputStream,
                     destination,
                     StandardCopyOption.REPLACE_EXISTING
             );
-
         } catch (IOException exception) {
             throw new InvalidPropertyImageException(
                     "The image could not be stored"
@@ -350,15 +270,11 @@ public class PropertyImageService {
         }
     }
 
-    private void deleteStoredFile(
-            String storedFileName
-    ) {
-        Path filePath =
-                safeDestination(storedFileName);
+    private void deleteStoredFile(String storedFileName) {
+        Path filePath = safeDestination(storedFileName);
 
         try {
             Files.deleteIfExists(filePath);
-
         } catch (IOException exception) {
             throw new InvalidPropertyImageException(
                     "The stored image could not be deleted"
@@ -370,15 +286,12 @@ public class PropertyImageService {
         try {
             Files.deleteIfExists(filePath);
         } catch (IOException ignored) {
-            // Preserve the original error.
+            // Keep the original exception.
         }
     }
 
-    private String safeOriginalFileName(
-            String originalFileName
-    ) {
-        if (originalFileName == null
-                || originalFileName.isBlank()) {
+    private String safeOriginalFileName(String originalFileName) {
+        if (originalFileName == null || originalFileName.isBlank()) {
             return "image";
         }
 
@@ -388,48 +301,23 @@ public class PropertyImageService {
 
         return fileName.length() <= 255
                 ? fileName
-                : fileName.substring(
-                fileName.length() - 255
-        );
+                : fileName.substring(fileName.length() - 255);
     }
 
-    private String buildImageUrl(
-            String storedFileName
-    ) {
-        return "/uploads/property-images/"
-                + storedFileName;
+    private String buildImageUrl(String storedFileName) {
+        return "/uploads/property-images/" + storedFileName;
     }
 
-    private PropertyImageResponse convertToResponse(
-            PropertyImage image
-    ) {
-        PropertyImageResponse response =
-                new PropertyImageResponse();
-
+    private PropertyImageResponse convertToResponse(PropertyImage image) {
+        PropertyImageResponse response = new PropertyImageResponse();
         response.setId(image.getId());
         response.setPropertyId(image.getPropertyId());
-
-        response.setOriginalFileName(
-                image.getOriginalFileName()
-        );
-
+        response.setOriginalFileName(image.getOriginalFileName());
         response.setContentType(image.getContentType());
         response.setFileSize(image.getFileSize());
-
-        response.setImageUrl(
-                buildImageUrl(
-                        image.getStoredFileName()
-                )
-        );
-
-        response.setPrimaryImage(
-                image.isPrimaryImage()
-        );
-
-        response.setUploadedAt(
-                image.getUploadedAt()
-        );
-
+        response.setImageUrl(buildImageUrl(image.getStoredFileName()));
+        response.setPrimaryImage(image.isPrimaryImage());
+        response.setUploadedAt(image.getUploadedAt());
         return response;
     }
 }

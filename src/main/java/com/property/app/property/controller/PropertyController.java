@@ -1,7 +1,7 @@
 package com.property.app.property.controller;
 
-import com.property.app.property.dto.PropertyRequest;
 import com.property.app.property.dto.PropertyRejectionRequest;
+import com.property.app.property.dto.PropertyRequest;
 import com.property.app.property.dto.PropertyResponse;
 import com.property.app.property.service.PropertyService;
 import jakarta.validation.Valid;
@@ -26,33 +26,23 @@ public class PropertyController {
     public ResponseEntity<PropertyResponse> createProperty(
             @Valid @RequestBody PropertyRequest request
     ) {
-        PropertyResponse createdProperty =
-                propertyService.createProperty(request);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(createdProperty);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(propertyService.createProperty(request));
     }
 
     @GetMapping
     public ResponseEntity<List<PropertyResponse>> getAllProperties() {
-        return ResponseEntity.ok(
-                propertyService.getAllProperties()
-        );
+        return ResponseEntity.ok(propertyService.getAllProperties());
     }
 
     @GetMapping("/pending")
     public ResponseEntity<List<PropertyResponse>> getPendingProperties() {
-        return ResponseEntity.ok(
-                propertyService.getPendingProperties()
-        );
+        return ResponseEntity.ok(propertyService.getPendingProperties());
     }
 
     @GetMapping("/published")
     public ResponseEntity<List<PropertyResponse>> getPublishedProperties() {
-        return ResponseEntity.ok(
-                propertyService.getPublishedProperties()
-        );
+        return ResponseEntity.ok(propertyService.getPublishedProperties());
     }
 
     @GetMapping("/seller/{sellerId}")
@@ -91,9 +81,7 @@ public class PropertyController {
     public ResponseEntity<PropertyResponse> getPropertyById(
             @PathVariable Long id
     ) {
-        return ResponseEntity.ok(
-                propertyService.getPropertyById(id)
-        );
+        return ResponseEntity.ok(propertyService.getPropertyById(id));
     }
 
     @PutMapping("/{id}")
@@ -110,18 +98,14 @@ public class PropertyController {
     public ResponseEntity<PropertyResponse> approveProperty(
             @PathVariable Long id
     ) {
-        return ResponseEntity.ok(
-                propertyService.approveProperty(id)
-        );
+        return ResponseEntity.ok(propertyService.approveProperty(id));
     }
 
     @PatchMapping("/{id}/publish")
     public ResponseEntity<PropertyResponse> publishProperty(
             @PathVariable Long id
     ) {
-        return ResponseEntity.ok(
-                propertyService.publishProperty(id)
-        );
+        return ResponseEntity.ok(propertyService.publishProperty(id));
     }
 
     @PatchMapping("/{id}/reject")
@@ -130,10 +114,7 @@ public class PropertyController {
             @Valid @RequestBody PropertyRejectionRequest request
     ) {
         return ResponseEntity.ok(
-                propertyService.rejectProperty(
-                        id,
-                        request.getReason()
-                )
+                propertyService.rejectProperty(id, request.getReason())
         );
     }
 
@@ -141,27 +122,21 @@ public class PropertyController {
     public ResponseEntity<PropertyResponse> resubmitProperty(
             @PathVariable Long id
     ) {
-        return ResponseEntity.ok(
-                propertyService.resubmitProperty(id)
-        );
+        return ResponseEntity.ok(propertyService.resubmitProperty(id));
     }
 
     @PatchMapping("/{id}/sold")
     public ResponseEntity<PropertyResponse> markPropertyAsSold(
             @PathVariable Long id
     ) {
-        return ResponseEntity.ok(
-                propertyService.markPropertyAsSold(id)
-        );
+        return ResponseEntity.ok(propertyService.markPropertyAsSold(id));
     }
 
     @PatchMapping("/{id}/archive")
     public ResponseEntity<PropertyResponse> archiveProperty(
             @PathVariable Long id
     ) {
-        return ResponseEntity.ok(
-                propertyService.archiveProperty(id)
-        );
+        return ResponseEntity.ok(propertyService.archiveProperty(id));
     }
 
     @DeleteMapping("/{id}")
@@ -169,7 +144,6 @@ public class PropertyController {
             @PathVariable Long id
     ) {
         propertyService.deleteProperty(id);
-
         return ResponseEntity.noContent().build();
     }
 }
